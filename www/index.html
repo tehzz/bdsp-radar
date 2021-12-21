@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <script src="https://cdn.plot.ly/plotly-2.6.3.min.js"></script>
+    <script src="extern/sortable.min.js"></script>
+    <link rel="stylesheet" href="extern/sortable-theme-light.css" />
+  </head>
+  <body>
+      <h1>Pokeradar Shiny Monte Carlo Times</h1>
+      <form>
+          <label for="chainStart">Starting Chain</label><input type="number" name="chainStart" id="chainStart">
+          <label for="chainMax">Max Chain Length</label><input type="number" name="chainMax" id="chainMax">
+          <label for="sampleSize">Sampling Runs</label><input type="number" name="sampleSize" id="sampleSize">
+          <label for="totalShinies">Total Shinies</label><input type="number" name="totalShinies" id="totalShinies">
+          <label for="pkmnWildrate">Pokemon Encounter Rate</label><input type="number" name="pkmnWildrate" id="pkmnWildrate">
+          <label for="timeForCatch">Time to Catch</label><input type="number" name="timeForCatch" id="timeForCatch">
+          <label for="timeForRun">Time to Run</label><input type="number" name="timeForRun" id="timeForRun">
+          <label for="timeForReroll">Time to Re-roll Pokeradar</label><input type="number" name="timeForReroll" id="timeForReroll">
+
+          <button type="button" id="startRunBtn">Run Monte Carlo Simulation</button>
+      </form>
+
+      <div id="results">
+      </div>
+
+      
+      <script src="main.js"></script>
+  </body>
+</html>
