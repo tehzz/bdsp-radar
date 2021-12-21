@@ -1,13 +1,18 @@
 mod errors;
 
 use rand::prelude::*;
+#[cfg(not(target_arch = "wasm32"))]
 use rayon::prelude::*;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
 
 pub use errors::RadarError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
 pub struct Config {
-    pub max_chain: u8,
+    pub chain_start: u8,
+    pub chain_max: u8,
     pub sample_size: u32,
     pub total_shinies: u32,
     // in thousandths
@@ -18,10 +23,28 @@ pub struct Config {
     pub time_for_reroll: u32,
 }
 
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+impl Config {
+    #[cfg_attr(target_arch = "wasm32", wasm_bindgen(constructor))]
+    pub fn new_web() -> Self {
+        Self {
+            chain_start: 1,
+            chain_max: 40,
+            sample_size: 1_000,
+            total_shinies: 1,
+            pkmn_wildrate: 10_0,
+            time_for_catch: 50,
+            time_for_run: 30,
+            time_for_reroll: 10,
+        }
+    }
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
-            max_chain: 40,
+            chain_start: 0,
+            chain_max: 40,
             sample_size: 3_000,
             total_shinies: 1,
             pkmn_wildrate: 10_0,
@@ -40,18 +63,28 @@ const RADAR_ODDS: &[u32] = &[
 const FULL_ODDS: u32 = RADAR_ODDS[0];
 const FINAL_ODDS: u32 = RADAR_ODDS[40];
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn find_shiny(config: Config) -> Result<Vec<Percentiles>, RadarError> {
     if config.pkmn_wildrate > 1000 {
         return Err(RadarError::CatchRateTooHigh(config.pkmn_wildrate));
     }
 
-    let chain_range = 0usize..=config.max_chain as usize;
+    let chain_range = config.chain_start as usize..=config.chain_max as usize;
     let find_shiny = |len| mc_find_radar_shiny(config, len);
 
     let mc_summary = chain_range.into_par_iter().map(find_shiny).collect();
 
     Ok(mc_summary)
 }
+
+#[cfg(target_arch = "wasm32")]
+pub fn find_shiny(config: Config) -> impl Iterator<Item = Percentiles> {
+    let chain_range = config.chain_start as usize..=config.chain_max as usize;
+    let find_shiny = move |len| mc_find_radar_shiny(config, len);
+
+    chain_range.into_iter().map(find_shiny)
+}
+
 
 fn encountered_correct_pkmn(rng: &mut ThreadRng, rate: u32) -> bool {
     rng.gen_ratio(rate, 1000)
