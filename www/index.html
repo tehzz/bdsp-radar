@@ -4,20 +4,45 @@
     <script src="https://cdn.plot.ly/plotly-2.6.3.min.js"></script>
     <script src="extern/sortable.min.js"></script>
     <link rel="stylesheet" href="extern/sortable-theme-light.css" />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
       <h1>Pokeradar Shiny Monte Carlo Times</h1>
-      <form>
-          <label for="chainStart">Starting Chain</label><input type="number" name="chainStart" id="chainStart">
-          <label for="chainMax">Max Chain Length</label><input type="number" name="chainMax" id="chainMax">
-          <label for="sampleSize">Sampling Runs</label><input type="number" name="sampleSize" id="sampleSize">
-          <label for="totalShinies">Total Shinies</label><input type="number" name="totalShinies" id="totalShinies">
-          <label for="pkmnWildrate">Pokemon Encounter Rate</label><input type="number" name="pkmnWildrate" id="pkmnWildrate">
-          <label for="timeForCatch">Time to Catch</label><input type="number" name="timeForCatch" id="timeForCatch">
-          <label for="timeForRun">Time to Run</label><input type="number" name="timeForRun" id="timeForRun">
-          <label for="timeForReroll">Time to Re-roll Pokeradar</label><input type="number" name="timeForReroll" id="timeForReroll">
-
-          <button type="button" id="startRunBtn">Run Monte Carlo Simulation</button>
+      <form id="mcParameters">
+        
+          <label for="chainStart">Starting Chain</label>
+          <input type="number" name="chainStart" id="chainStart" min=0 max=40>
+          <p>The smallest chain to build [0 to 40]</p>
+        
+          <label for="chainMax">Max Chain Length</label>
+          <input type="number" name="chainMax" id="chainMax" min=0 max=40>
+          <p>The largest chain to build [0 to 40]</p>
+        
+          <label for="sampleSize">Sampling Runs</label>
+          <input type="number" name="sampleSize" id="sampleSize" min=100>
+          <p>The number of trials to run to find a shiny [>= 100]</p>
+        
+          <label for="totalShinies">Total Shinies</label>
+          <input type="number" name="totalShinies" id="totalShinies" min=1>
+          <p>The number of shinies to find at every chain length [> 0]</p>
+        
+          <label for="pkmnWildrate">Pokemon Encounter Rate</label>
+          <input type="number" name="pkmnWildrate" id="pkmnWildrate" min=1 max=100 step=0.1>
+          <p>The encounter rate of the target pokemon in the radar grass patches [0.1% to 100%]</p>
+        
+          <label for="timeForCatch">Time to Catch</label>
+          <input type="number" name="timeForCatch" id="timeForCatch" min=1>
+          <p>The average time <b>in seconds</b> to catch the target pokemon [> 0]</p>
+          
+          <label for="timeForRun">Time to Run</label>
+          <input type="number" name="timeForRun" id="timeForRun" min=1>
+          <p>The average time <b>in seconds</b> to run away from encountering the wrong pokemon [> 0]</p>
+          
+          <label for="timeForReroll">Time to Re-roll Pokeradar</label>
+          <input type="number" name="timeForReroll" id="timeForReroll" min=1>
+          <p>The average time <b>in seconds</b> to re-roll the Pokeradar to see another four shaking grass patches [> 0]</p>
+        
+          <button id="startRunBtn">Run Monte Carlo Simulation</button>
       </form>
 
       <div id="results">

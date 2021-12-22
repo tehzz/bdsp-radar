@@ -43,6 +43,9 @@ async function init_wasm_worker() {
             }
             case "SET": {
                 const val = d.val;
+
+                console.log("set", d);
+                
                 switch (d.param) {
                     case "chainStart": config.chain_start = val; break;
                     case "chainMax": config.chain_max = val; break;

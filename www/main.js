@@ -1,4 +1,30 @@
 // global values
+const valChecker = { 
+    // store as a integer in 1000ths, turn to a percent (100ths)
+    "pkmnWildrate": {
+        get: (val) => val / 10,
+        set: (val) => val * 10,
+    }
+}
+
+let timerStart = null;
+const timer = {
+    start: () => {
+        timerStart = performance.now()
+    },
+    end: () => {
+        if (timerStart === null) {
+            console.error("missing timer start value")
+        }
+        const delta = performance.now() - timerStart
+        timerStart = null
+        return delta
+    }
+}
+
+const ELEMENTS = {
+    loader: "spinner"
+}
 
 
 // actual main function
@@ -20,10 +46,17 @@ function workerReceiver(evt) {
             if (d.val === null) { 
                 console.error("received empty get value from config", d)
             }
-            document.getElementById(d.id).value = d.val;
+            const val = valChecker[d.id] === undefined ? 
+                d.val : 
+                valChecker[d.id].get(d.val);
+
+            document.getElementById(d.id).value = val;
             break;
         case "FINISHED_RUN":
         {
+            let delta = timer.end();
+            console.log("finished timer:", delta);
+            document.getElementById(ELEMENTS['loader']).remove()
             plotData(d.data)
 
             let tbl = createTable(d.data);
@@ -56,35 +89,51 @@ function initializeParameters(worker) {
     }
 
     document
-        .getElementById("startRunBtn")
-        .addEventListener("click", e => startWorker(worker, e))
+        .getElementById("mcParameters")
+        .addEventListener("submit", e => startWorker(worker, e))
 }
 
 function setParamter(worker, evt) {
     let param = evt.target.id;
     let val = evt.target.value;
+    
+    if (valChecker[param] !== undefined) {
+        val = valChecker[param].set(val)
+    }
+
     worker.postMessage({cmd:"SET", param, val})
 }
 
-function startWorker(worker, _evt) {
-    document.getElementById("results").innerHTML = "";
-
+function startWorker(worker, evt) {
+    evt.preventDefault()
+    document
+        .getElementById("results")
+        .innerHTML = `<div id="${ELEMENTS['loader']}" class="loader">Loading...</div>`;
+    
+    timer.start()
     worker.postMessage({cmd: "RUN"})
 }
 
 function plotData(data) {
     let plot = document.createElement("div");
+    plot.id = "boxPlot"
+    plot.style = "width:90%"
     
     let layout = {
-        title: 'Radar Shiny Time (min)',
+        title: 'Chain Length vs. Time to Find Shiny (min)',
         yaxis: {
             title: {text: "Minutes"},
             type: "linear",
         },
         xaxis: {
             title: {text: "Target Chain Length"}
-        }
+        },
+        autosize: true
     };
+
+    let config = {
+        responsive: true,
+    }
     
     let toPlot = {
         x0: data[0].chainLen,
@@ -105,10 +154,9 @@ function plotData(data) {
         toPlot.upperfence.push(roundNum(chain.q98 / 60))
     }
 
-    console.log(toPlot)
-
-    Plotly.newPlot(plot, [toPlot], layout)
+    Plotly.newPlot(plot, [toPlot], layout, config)
     document.getElementById("results").appendChild(plot)
+    window.dispatchEvent(new Event('resize'))
 }
 
 /**
