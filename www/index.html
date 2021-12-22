@@ -1,15 +1,16 @@
 <html>
   <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+
     <script src="https://cdn.plot.ly/plotly-2.6.3.min.js"></script>
     <script src="extern/sortable.min.js"></script>
+    
     <link rel="stylesheet" href="extern/sortable-theme-light.css" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
       <h1>Pokeradar Shiny Monte Carlo Times</h1>
       <form id="mcParameters">
-        
           <label for="chainStart">Starting Chain</label>
           <input type="number" name="chainStart" id="chainStart" min=0 max=40>
           <p>The smallest chain to build [0 to 40]</p>
@@ -48,7 +49,6 @@
       <div id="results">
       </div>
 
-      
       <script src="main.js"></script>
   </body>
 </html>
