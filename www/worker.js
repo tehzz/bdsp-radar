@@ -45,7 +45,7 @@ async function init_wasm_worker() {
                 const val = d.val;
 
                 console.log("set", d);
-                
+
                 switch (d.param) {
                     case "chainStart": config.chain_start = val; break;
                     case "chainMax": config.chain_max = val; break;
@@ -86,11 +86,11 @@ function parse_quartile_data(raw, startedAt) {
     for (let i = 0; i < raw.length; i += 5) {
         let datum = {
             chainLen: startedAt + i / 5,
-            q02: raw[i + 0],
+            q09: raw[i + 0],
             q25: raw[i + 1],
             q50: raw[i + 2],
             q75: raw[i + 3],
-            q98: raw[i + 4],
+            q91: raw[i + 4],
         }
 
         summary.push(datum)

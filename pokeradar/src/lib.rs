@@ -165,11 +165,11 @@ fn chain_continues(rng: &mut ThreadRng) -> bool {
 /// the number of seconds needed to find a pokeradar shiny
 #[derive(Debug, Clone, Copy)]
 pub struct Percentiles {
-    pub q02: f64,
+    pub q09: f64,
     pub q25: f64,
     pub q50: f64,
     pub q75: f64,
-    pub q98: f64,
+    pub q91: f64,
 }
 
 // assumes sorted data
@@ -178,11 +178,11 @@ impl From<&[u32]> for Percentiles {
         debug_assert!(data.len() > 2, "need data to find percentiles");
 
         Self {
-            q02: quantile(data, 0.02),
+            q09: quantile(data, 0.09),
             q25: quantile(data, 0.25),
             q50: quantile(data, 0.50),
             q75: quantile(data, 0.75),
-            q98: quantile(data, 0.98),
+            q91: quantile(data, 0.91),
         }
     }
 }

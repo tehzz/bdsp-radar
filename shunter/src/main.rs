@@ -9,7 +9,7 @@ fn main() -> Result<(), pokeradar::RadarError> {
     println!(
         "staring run of {} iterations up to chain of {} @ {:.1}% encounter rate for {} shin{}",
         config.sample_size,
-        config.max_chain,
+        config.chain_max,
         config.pkmn_wildrate as f32 / 10.,
         config.total_shinies,
         if config.total_shinies > 1 { "ies" } else { "y" }
@@ -21,10 +21,10 @@ fn main() -> Result<(), pokeradar::RadarError> {
             "{}\t{:.2} min |{:.2}---[{:.2} to {:.2}]---{:.2}|",
             run,
             p.q50 / 60.,
-            p.q02 / 60.,
+            p.q09 / 60.,
             p.q25 / 60.,
             p.q75 / 60.,
-            p.q98 / 60.
+            p.q91 / 60.
         );
     }
 

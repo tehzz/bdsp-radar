@@ -26,7 +26,6 @@ const ELEMENTS = {
     loader: "spinner"
 }
 
-
 // actual main function
 if (window.Worker) {
     const radarWorker = new Worker("./worker.js")
@@ -38,6 +37,7 @@ if (window.Worker) {
     console.error("Workers not supported in your browser")
 }
 
+// other functions (callback routines and helpers)
 function workerReceiver(evt) {
     const d = evt.data;
 
@@ -121,6 +121,7 @@ function startWorker(worker, evt) {
 }
 
 function plotData(data) {
+    console.log(data)
     let plot = document.createElement("div");
     plot.id = "boxPlot"
     plot.style = "width:90%"
@@ -153,11 +154,11 @@ function plotData(data) {
         name: "radar chain stats",
     }
     for (let chain of data) {
-        toPlot.lowerfence.push(roundNum(chain.q02 / 60))
+        toPlot.lowerfence.push(roundNum(chain.q09 / 60))
         toPlot.q1.push(roundNum(chain.q25 / 60))
         toPlot.median.push(roundNum(chain.q50 / 60))
         toPlot.q3.push(roundNum(chain.q75 / 60))
-        toPlot.upperfence.push(roundNum(chain.q98 / 60))
+        toPlot.upperfence.push(roundNum(chain.q91 / 60))
     }
 
     Plotly.newPlot(plot, [toPlot], layout, config)
@@ -175,7 +176,7 @@ function roundNum(n) {
 }
 
 function createTable(data) {
-    const hdrs = ['Chain Length', 'Median', 'IQR', 'Q2', 'Q25', 'Q75', 'Q98']
+    const hdrs = ['Chain Length', 'Median', 'IQR', 'Q9', 'Q25', 'Q75', 'Q91']
     
     const tbl = document.createElement('table')
     const thead = document.createElement('thead')
@@ -194,10 +195,10 @@ function createTable(data) {
         tr.appendChild(makeDataCell(datum.chainLen, false))
         tr.appendChild(makeDataCell(datum.q50 / 60))
         tr.appendChild(makeDataCell((datum.q75 - datum.q25) / 60))
-        tr.appendChild(makeDataCell(datum.q02 / 60))
+        tr.appendChild(makeDataCell(datum.q09 / 60))
         tr.appendChild(makeDataCell(datum.q25 / 60))
         tr.appendChild(makeDataCell(datum.q75 / 60))
-        tr.appendChild(makeDataCell(datum.q98 / 60))
+        tr.appendChild(makeDataCell(datum.q91 / 60))
 
         tbody.appendChild(tr)
     }
