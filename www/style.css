@@ -50,6 +50,15 @@ label {
     margin: auto;
 }
 
+#results > p {
+    background-color: #333;
+    color: #eee;
+    text-align: center;
+    width: 75%;
+    margin: auto;
+    border: 1px solid #aaa;
+}
+
 /* https://projects.lukehaas.me/css-loaders/ */
 .loader,
 .loader:after {

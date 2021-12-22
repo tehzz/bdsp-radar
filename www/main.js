@@ -57,11 +57,17 @@ function workerReceiver(evt) {
             let delta = timer.end();
             console.log("finished timer:", delta);
             document.getElementById(ELEMENTS['loader']).remove()
+
             plotData(d.data)
 
             let tbl = createTable(d.data);
             document.getElementById("results").appendChild(tbl)
             Sortable.initTable(tbl)
+
+            const timeReport = document.createElement('p')
+            timeReport.textContent = `Time to run: ${delta / 1000}s`
+            document.getElementById("results").appendChild(timeReport)
+
             break;
         }
         default:
