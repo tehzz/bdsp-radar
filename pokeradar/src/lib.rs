@@ -85,7 +85,6 @@ pub fn find_shiny(config: Config) -> impl Iterator<Item = Percentiles> {
     chain_range.into_iter().map(find_shiny)
 }
 
-
 fn encountered_correct_pkmn(rng: &mut ThreadRng, rate: u32) -> bool {
     rng.gen_ratio(rate, 1000)
 }

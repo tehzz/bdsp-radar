@@ -1,5 +1,5 @@
-use wasm_bindgen::prelude::*;
 use pokeradar;
+use wasm_bindgen::prelude::*;
 
 pub use pokeradar::Config;
 
