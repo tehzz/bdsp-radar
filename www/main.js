@@ -23,8 +23,32 @@ const timer = {
 }
 
 const ELEMENTS = {
-    loader: "spinner"
+    loader: "spinner",
+    plot: "boxPlot",
+    results: "results",
+    resTable: "radarDataTable",
 }
+
+let SAVED_DATA = null;
+
+const TimeUnits = {
+    "min": {
+        factor: 60,
+        short: "min",
+        long: "minutes"
+    },
+    "hr": {
+        factor: 60 * 60,
+        short: "hr",
+        long: "hours"
+    },
+    "days": {
+        factor: 60 * 60 * 24,
+        short: "days",
+        long: "days"
+    },
+}
+let REPORTING_UNIT = TimeUnits["min"]
 
 // actual main function
 if (window.Worker) {
@@ -58,15 +82,22 @@ function workerReceiver(evt) {
             console.log("finished timer:", delta);
             document.getElementById(ELEMENTS['loader']).remove()
 
-            plotData(d.data)
+            SAVED_DATA = d.data
+            
+            const resEl = document.getElementById(ELEMENTS['results'])
+
+            const radio = createUnitRadio();
+            resEl.appendChild(radio)
+
+            plotData(d.data, resEl)
 
             let tbl = createTable(d.data);
-            document.getElementById("results").appendChild(tbl)
+            resEl.appendChild(tbl)
             Sortable.initTable(tbl)
 
             const timeReport = document.createElement('p')
-            timeReport.textContent = `Time to run: ${delta / 1000}s`
-            document.getElementById("results").appendChild(timeReport)
+            timeReport.textContent = `Time to run: ${delta / 1000} seconds`
+            resEl.appendChild(timeReport)
 
             break;
         }
@@ -115,35 +146,60 @@ function startWorker(worker, evt) {
     document
         .getElementById("results")
         .innerHTML = `<div id="${ELEMENTS['loader']}" class="loader">Loading...</div>`;
-    
+        
+    SAVED_DATA = null;
     timer.start()
     worker.postMessage({cmd: "RUN"})
 }
 
-function plotData(data) {
-    console.log(data)
+function plotData(data, el) {
     let plot = document.createElement("div");
     plot.id = "boxPlot"
-    plot.style = "width:90%"
+    //plot.style = "width:90%"
     
-    let layout = {
-        title: 'Chain Length vs. Time to Find Shiny (min)',
+    let layout = getPlotLayout(true)
+    let config = getPlotConfig()
+    let toPlot = getPlotData(data)
+
+    Plotly.newPlot(plot, [toPlot], layout, config)
+    el.appendChild(plot)
+    window.dispatchEvent(new Event('resize'))
+}
+
+function updatePlot(data, plotEl) {
+    let layout = getPlotLayout()
+    let config = getPlotConfig()
+    let toPlot = getPlotData(data)
+
+    Plotly.react(plotEl, [toPlot], layout, config)
+}
+
+// get the layout object for Plotly
+function getPlotLayout(newPlot = false) {
+    return {
+        title: `Chain Length vs. Time to Find Shiny (${REPORTING_UNIT.short})`,
         yaxis: {
-            title: {text: "Minutes"},
+            title: {text: REPORTING_UNIT.long},
             type: "linear",
         },
         xaxis: {
             title: {text: "Target Chain Length"}
         },
-        autosize: true
+        autosize: newPlot
     };
+}
 
-    let config = {
+// get the config object for Plotly
+function getPlotConfig() {
+    return {
         responsive: true,
     }
-    
-    let toPlot = {
-        x0: data[0].chainLen,
+}
+
+// format the mc chain data for Plotly box plots
+function getPlotData(raw) {
+    let res = {
+        x0: raw[0].chainLen,
         dx: 1,
         lowerfence: [],
         q1: [],
@@ -153,19 +209,17 @@ function plotData(data) {
         type: "box",
         name: "radar chain stats",
     }
-    for (let chain of data) {
-        toPlot.lowerfence.push(roundNum(chain.q09 / 60))
-        toPlot.q1.push(roundNum(chain.q25 / 60))
-        toPlot.median.push(roundNum(chain.q50 / 60))
-        toPlot.q3.push(roundNum(chain.q75 / 60))
-        toPlot.upperfence.push(roundNum(chain.q91 / 60))
+    const factor = REPORTING_UNIT.factor
+    for (let chain of raw) {
+        res.lowerfence.push(roundNum(chain.q09 / factor))
+        res.q1.push(roundNum(chain.q25 / factor))
+        res.median.push(roundNum(chain.q50 / factor))
+        res.q3.push(roundNum(chain.q75 / factor))
+        res.upperfence.push(roundNum(chain.q91 / factor))
     }
 
-    Plotly.newPlot(plot, [toPlot], layout, config)
-    document.getElementById("results").appendChild(plot)
-    window.dispatchEvent(new Event('resize'))
+    return res
 }
-
 /**
  * 
  * @param {number} n 
@@ -190,22 +244,23 @@ function createTable(data) {
     tbl.appendChild(thead)
 
     const tbody = document.createElement('tbody')
+    const factor = REPORTING_UNIT.factor
     for (let datum of data) {
         let tr = document.createElement('tr')
         tr.appendChild(makeDataCell(datum.chainLen, false))
-        tr.appendChild(makeDataCell(datum.q50 / 60))
-        tr.appendChild(makeDataCell((datum.q75 - datum.q25) / 60))
-        tr.appendChild(makeDataCell(datum.q09 / 60))
-        tr.appendChild(makeDataCell(datum.q25 / 60))
-        tr.appendChild(makeDataCell(datum.q75 / 60))
-        tr.appendChild(makeDataCell(datum.q91 / 60))
+        tr.appendChild(makeDataCell(datum.q50 / factor))
+        tr.appendChild(makeDataCell((datum.q75 - datum.q25) / factor))
+        tr.appendChild(makeDataCell(datum.q09 / factor))
+        tr.appendChild(makeDataCell(datum.q25 / factor))
+        tr.appendChild(makeDataCell(datum.q75 / factor))
+        tr.appendChild(makeDataCell(datum.q91 / factor))
 
         tbody.appendChild(tr)
     }
     tbl.appendChild(tbody)
     tbl.setAttribute("data-sortable", "")
     tbl.classList.add("sortable-theme-light")
-    tbl.id = "radarDataTable"
+    tbl.id = ELEMENTS.resTable
 
     return tbl
 }
@@ -224,4 +279,58 @@ function makeDataCell(x, fixed = true) {
     }
 
     return td
+}
+
+// routines to make the unit selector
+function createUnitRadio() {
+    const f = document.createElement('form')
+    f.id = "unitSelector"
+    for (const [unit, info] of Object.entries(TimeUnits)) {
+        let radio = makeRadioButton(
+            "unit", 
+            info.long, 
+            "unit" + unit, 
+            unit, 
+            info.short === REPORTING_UNIT.short
+        );
+        f.appendChild(radio)
+    }
+    f.addEventListener('submit', e => e.preventDefault())
+    f.addEventListener('change', updateTimeUnit)
+
+    return f
+}
+
+function makeRadioButton(name, label, id, value, checked = false) {
+    const c = document.createElement('div')
+    const i = document.createElement('input')
+    i.type = "radio"
+    i.id = id
+    i.name = name
+    i.value = value
+    i.checked = checked
+
+    const l = document.createElement('label')
+    l.textContent = label
+    l.htmlFor = id
+
+    c.appendChild(i)
+    c.appendChild(l)
+    return c
+}
+
+function updateTimeUnit(evt) {
+    const unit = evt.srcElement.value
+    const info = TimeUnits[unit]
+
+    if (info === undefined) {
+        console.error("unknown unit", unit)
+    } else {
+        console.log("updating unit to", unit)
+        REPORTING_UNIT = info
+        updatePlot(SAVED_DATA, document.getElementById(ELEMENTS.plot))
+        const tbl = createTable(SAVED_DATA)
+        document.getElementById(ELEMENTS.resTable).replaceWith(tbl)
+        Sortable.initTable(tbl)
+    }
 }

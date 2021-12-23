@@ -4,12 +4,12 @@
 
     <script src="https://cdn.plot.ly/plotly-2.6.3.min.js"></script>
     <script src="extern/sortable.min.js"></script>
-    
+
     <link rel="stylesheet" href="extern/sortable-theme-light.css" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-      <h1>Pokeradar Shiny Monte Carlo Times</h1>
+      <h1>Pokeradar Shiny Time Estimator</h1>
       <form id="mcParameters">
           <label for="chainStart">Starting Chain</label>
           <input type="number" name="chainStart" id="chainStart" min=0 max=40>
@@ -43,7 +43,7 @@
           <input type="number" name="timeForReroll" id="timeForReroll" min=1>
           <p>The average time <b>in seconds</b> to re-roll the Pokeradar to see another four shaking grass patches [> 0]</p>
         
-          <button id="startRunBtn">Run Monte Carlo Simulation</button>
+          <button id="startRunBtn">Run Simulation</button>
       </form>
 
       <div id="results">
