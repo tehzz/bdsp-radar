@@ -29,7 +29,7 @@ function settingsToConfig(settings) {
     config.chain_max = settings.chain_max
     config.sample_size = settings.sample_size
     config.total_shinies = settings.total_shinies
-    config.pkmn_wildrate = settings.pkmn_wildrate
+    config.pkmn_wildrate = settings.pkmn_wildrate * 10
     config.time_for_catch = settings.time_for_catch
     config.time_for_run = settings.time_for_run
     config.time_for_reroll = settings.time_for_reroll

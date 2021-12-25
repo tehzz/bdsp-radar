@@ -1,53 +1,9 @@
-// ---------- classes and types ----------
-class StatusTimer {
-    constructor() {
-        this.startTime = null
-        this.stopTime = null
-        this.finished = false
-        this.splits = 0
-        this.total = 0
-    }
+import { Settings, StatusTimer } from './mod/utils.js'
+import { WorkerPool } from './mod/pool.js'
 
-    start(total) {
-        this.startTime = performance.now()
-        this.stopTime = null
-        this.finished = false
-        this.splits = 0
-        this.total = total
-    }
-    split() {
-        if (this.startTime === null) {
-            console.error("Timer not started when split")
-            throw new Error('timer split before started')
-        }
-        this.splits += 1;
-        if (this.splits >= this.total) {
-            this.done()
-        }
-    }
-    done() {
-        this.stopTime = performance.now()
-        this.finished = true
-    }
-    render() {
-        const el = document.createElement('div')
-        el.id = ELEMENTS.timer
-        if (this.finished) {
-            const time = (this.stopTime - this.startTime) / 1000
-            el.textContent = `Simulation completed in ${time.toFixed(2)} seconds`
-        } else if (this.startTime === null) {
-            el.textContext = 'Timer not started'
-        } else {
-            el.textContent = `Running [${this.splits} chains finished of ${this.total} total]`
-            el.classList.add('spinner')
-        }
-
-        return el
-    }
-}
-
+// ---------- types ----------
 /**
- * The returned data from a simulation
+ * The important data from a simulation
  * @typedef {Object} SimulationData
  * @property {number} chainLen - the target length of radar chain
  * @property {number} q09 - the 9th quantitle
@@ -57,19 +13,17 @@ class StatusTimer {
  * @property {number} q91 - the 91st quantitle
  */
 
+/**
+ * The raw data from a simulation
+ * @typedef {Object} RawSimData
+ * @property {number} chainLen
+ * @property {Float64Array} raw - [f64; 5]
+ */
+
 
 // ---------- global values ----------
-const valChecker = { 
-    // store as a integer in 1000ths, turn to a percent (100ths)
-    "pkmnWildrate": {
-        get: (val) => val / 10,
-        set: (val) => val * 10,
-    }
-}
-
-const TIMER = new StatusTimer()
-
 const ELEMENTS = {
+    params: "mcParameters",
     loader: "spinner",
     plot: "boxPlot",
     results: "results",
@@ -77,8 +31,21 @@ const ELEMENTS = {
     timer: "statusTimer"
 }
 
+/** Key to convert input element id to field in Settings/Config struct */
+const InputToSet = {
+    'chainStart': 'chain_start',
+    'chainMax': 'chain_max',
+    'sampleSize': 'sample_size',
+    'totalShinies': 'total_shinies',
+    'pkmnWildrate': 'pkmn_wildrate',
+    'timeForCatch': 'time_for_catch',
+    'timeForRun': 'time_for_run',
+    'timeForReroll': 'time_for_reroll',
+}
+
 /** @type {?SimulationData[]} */
 let SAVED_DATA = null;
+const TIMER = new StatusTimer(ELEMENTS.timer)
 
 const TimeUnits = {
     "min": {
@@ -100,133 +67,122 @@ const TimeUnits = {
 let REPORTING_UNIT = TimeUnits["min"]
 
 // ---------- actual main function ----------
-if (window.Worker) {
-    const radarWorker = new Worker("./conductor.js")
-    radarWorker.onmessage = (e) => {
-        radarWorker.onmessage = workerReceiver;
-        initializeParameters(radarWorker);
+function main() {
+    // create pool
+    // initialize parameters to default
+    // attach event listeners to form (with ref to pool)
+    if (!window.Worker) {
+        console.error("Workers not supported")
+        throw new Error("Need web workers")
     }
-} else {
-    console.error("Workers not supported in your browser")
+
+    const pool = new WorkerPool('./actor.js')
+    initializeParameters(pool)
 }
 
-// ---------- callback and receiver routines ----------
-/**
- * The main receiver for getting data back from the simulation
- * @param {MessageEvent} evt - from the main orchestrator worker
- */
-function workerReceiver(evt) {
-    const d = evt.data;
+main()
 
-    switch (d.kind) {
-        case "GET_CONFIG":
-        {
-            if (d.val === null) { 
-                console.error("received empty get value from config", d)
-            }
-            const val = valChecker[d.id] === undefined ? 
-                d.val : 
-                valChecker[d.id].get(d.val);
+function initializeParameters(pool) {
+    const defaultSettings = new Settings()
 
-            document.getElementById(d.id).value = val;
-            break;
-        }
-        case "FINISHED_CHAIN":
-        {
-            const resEl = document.getElementById(ELEMENTS['results'])
-            let res = d.data
-            console.log("new data for len " + res.chainLen)
-            TIMER.split()
-
-            if (SAVED_DATA === null) {
-                // first result of chain
-                SAVED_DATA = []
-                SAVED_DATA[res.chainLen] = res
-                
-                const radio = createUnitRadio();
-                resEl.appendChild(radio)
-
-                plotData(SAVED_DATA, resEl)
-
-                let tbl = createTable(SAVED_DATA);
-                resEl.appendChild(tbl)
-                Sortable.initTable(tbl)
-            } else {
-                SAVED_DATA[res.chainLen] = res
-                updateResultsInfo(SAVED_DATA)
-            }
-            
-            document.getElementById(ELEMENTS.timer).replaceWith(TIMER.render())
-            break;
-        }
-        default:
-            console.error("Unsupported data from worker", d);
-    }
-}
-
-/**
- * Initialize the HTML form inputs with the current settings for the simulation,
- * then attach event listener for updating the values and starting a run of the simulation
- * @param {Worker} worker 
- */
-function initializeParameters(worker) {
-    const params = [
-        "chainStart", 
-        "chainMax", 
-        "sampleSize", 
-        "totalShinies", 
-        "pkmnWildrate", 
-        "timeForCatch", 
-        "timeForRun",
-        "timeForReroll"
-    ]
-
-    for (const param of params) {
-        worker.postMessage({cmd: "GET", param})
-        document
-            .getElementById(param)
-            .addEventListener("change", evt => setParamter(worker, evt))
+    for (const [id, key] of Object.entries(InputToSet)) {
+        document.getElementById(id).value = defaultSettings[key]
     }
 
     document
-        .getElementById("mcParameters")
-        .addEventListener("submit", e => startWorker(worker, e))
+        .getElementById(ELEMENTS.params)
+        .addEventListener("submit", e => runSimulation(pool, e))
 }
 
 /**
- * Set the changed simulation parameter in `worker`
- * @param {Worker} worker 
- * @param {Event} evt 
+ * 
+ * @param {WorkerPool} pool 
+ * @param {Event} evt
  */
-function setParamter(worker, evt) {
-    let param = evt.target.id;
-    let val = evt.target.value;
-    
-    if (valChecker[param] !== undefined) {
-        val = valChecker[param].set(val)
-    }
-
-    worker.postMessage({cmd:"SET", param, val})
-}
-
-/**
- * Start the simulation, clear the old data and results, and add the progress timer
- * @param {Worker} worker 
- * @param {Event} evt 
- */
-function startWorker(worker, evt) {
+function runSimulation(pool, evt) {
     evt.preventDefault()
 
     const formdata = new FormData(evt.target)
-    TIMER.start(formdata.get('chainMax') - formdata.get('chainStart') + 1)
+    const settings = formToSettings(formdata)
+
+    TIMER.start(settings.chain_max - settings.chain_start + 1)
 
     const resdiv = document.getElementById(ELEMENTS.results)
     while(resdiv.firstChild && resdiv.removeChild(resdiv.firstChild));
     resdiv.appendChild(TIMER.render())
         
     SAVED_DATA = null;
-    worker.postMessage({cmd: "RUN"})
+    for (let i = settings.chain_start; i <= settings.chain_max; i++) {
+        let msg = {settings, target: i}
+        pool.queueJob(msg, saveRunData, this)
+    }
 }
+
+/**
+ * 
+ * @param {RawSimData} rawData 
+ */
+function saveRunData(rawData) {
+    const resEl = document.getElementById(ELEMENTS['results'])
+    const res = rawToLabeled(rawData)
+
+    console.log("new data for len " + res.chainLen)
+    TIMER.split()
+
+    if (SAVED_DATA === null) {
+        // first result of chain
+        SAVED_DATA = []
+        SAVED_DATA[res.chainLen] = res
+        
+        const radio = createUnitRadio();
+        resEl.appendChild(radio)
+
+        plotData(SAVED_DATA, resEl)
+
+        let tbl = createTable(SAVED_DATA);
+        resEl.appendChild(tbl)
+        Sortable.initTable(tbl)
+    } else {
+        SAVED_DATA[res.chainLen] = res
+        updateResultsInfo(SAVED_DATA)
+    }
+    
+    document.getElementById(ELEMENTS.timer).replaceWith(TIMER.render())
+}
+
+/**
+ * 
+ * @param {FormData} formData 
+ * @returns {Settings}
+ */
+function formToSettings(formData) {
+    let settings = new Settings()
+    for (const [id, key] of Object.entries(InputToSet)) {
+        settings[key] = formData.get(id)
+    }
+
+    return settings
+}
+
+/**
+ * 
+ * @param {RawSimData} rawData 
+ * @returns {SimulationData}
+ */
+function rawToLabeled(rawData) {
+    const {raw, chainLen} = rawData
+    return {
+        chainLen,
+        q09: raw[0],
+        q25: raw[1],
+        q50: raw[2],
+        q75: raw[3],
+        q91: raw[4],
+    }
+}
+
+// ---------- callback and receiver routines ----------
+
 
 // ---------- helper routines ----------
 
