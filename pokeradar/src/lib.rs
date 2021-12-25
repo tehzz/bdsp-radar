@@ -89,7 +89,7 @@ fn encountered_correct_pkmn(rng: &mut ThreadRng, rate: u32) -> bool {
     rng.gen_ratio(rate, 1000)
 }
 
-fn mc_find_radar_shiny(config: Config, target_chain_size: usize) -> Percentiles {
+pub fn mc_find_radar_shiny(config: Config, target_chain_size: usize) -> Percentiles {
     let mut rng = thread_rng();
     let mut set = Vec::with_capacity(config.sample_size as usize);
     let found_all_shines = |cur| cur >= config.total_shinies;
