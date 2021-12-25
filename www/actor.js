@@ -21,8 +21,6 @@ function runSimulation(msg) {
     self.postMessage({chainLen: target, raw: result}, [result.buffer])
 }
 
-init_actor()
-
 function settingsToConfig(settings) {
     let config = new Config()
     config.chain_start = settings.chain_start
@@ -36,3 +34,5 @@ function settingsToConfig(settings) {
 
     return config
 }
+
+init_actor()

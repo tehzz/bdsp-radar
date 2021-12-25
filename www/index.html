@@ -11,6 +11,7 @@
   <body>
       <h1>Pokeradar Shiny Time Estimator</h1>
       <form id="mcParameters">
+        <fieldset>
           <label for="chainStart">Starting Chain</label>
           <input type="number" name="chainStart" id="chainStart" min=0 max=40>
           <p>The smallest chain to build [0 to 40]</p>
@@ -44,6 +45,7 @@
           <p>The average time <b>in seconds</b> to re-roll the Pokeradar to see another four shaking grass patches [> 0]</p>
         
           <button id="startRunBtn">Run Simulation</button>
+        </fieldset>
       </form>
 
       <div id="results">

@@ -16,7 +16,7 @@ h1 {
     text-align: center;
 }
 
-form {
+#mcParameters > fieldset {
     margin: auto;
     width: 85%;
     min-width: 20rem;
@@ -24,18 +24,19 @@ form {
     gap: 0.25rem;
     grid-template-columns: 1fr 1fr 3fr;
     align-items: center;
+    border: none;
 }
 
-form > label {
+fieldset > label {
     border-bottom: 1px dotted #111;
 }
 
-form > p {
+fieldset > p {
     margin: 0.16rem;
     font-size: 0.9em;
 }
 
-form > button {
+fieldset > button {
     grid-column: 1 / span 3;
 }
 
