@@ -7,7 +7,7 @@
     constructor() {
         this.chain_start     = 1
         this.chain_max       = 40
-        this.sample_size     = 10000
+        this.sample_size     = 15000
         this.total_shinies   = 1
         this.pkmn_wildrate   = 10.0
         this.time_for_catch  = 50
