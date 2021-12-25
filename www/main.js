@@ -20,8 +20,8 @@ import { WorkerPool } from './mod/pool.js'
  * @property {Float64Array} raw - [f64; 5]
  */
 
-
 // ---------- global values ----------
+/** HTML element IDs */
 const ELEMENTS = {
     params: "mcParameters",
     loader: "spinner",
@@ -43,10 +43,6 @@ const InputToSet = {
     'timeForReroll': 'time_for_reroll',
 }
 
-/** @type {?SimulationData[]} */
-let SAVED_DATA = null;
-const TIMER = new StatusTimer(ELEMENTS.timer)
-
 const TimeUnits = {
     "min": {
         factor: 60,
@@ -66,11 +62,12 @@ const TimeUnits = {
 }
 let REPORTING_UNIT = TimeUnits["min"]
 
+/** @type {?SimulationData[]} */
+let SAVED_DATA = null;
+const TIMER = new StatusTimer(ELEMENTS.timer)
+
 // ---------- actual main function ----------
 function main() {
-    // create pool
-    // initialize parameters to default
-    // attach event listeners to form (with ref to pool)
     if (!window.Worker) {
         console.error("Workers not supported")
         throw new Error("Need web workers")
@@ -82,6 +79,13 @@ function main() {
 
 main()
 
+// ---------- setup, callback, and receiver routines ----------
+
+/**
+ * Initialize the HTML input elements to default values,
+ * and attach a submit listener to the HTML form
+ * @param {WorkerPool} pool 
+ */
 function initializeParameters(pool) {
     const defaultSettings = new Settings()
 
@@ -95,7 +99,8 @@ function initializeParameters(pool) {
 }
 
 /**
- * 
+ * The function invoked on parameters form submit to start running 
+ * the radar simulation in the worker pool
  * @param {WorkerPool} pool 
  * @param {Event} evt
  */
@@ -119,7 +124,22 @@ function runSimulation(pool, evt) {
 }
 
 /**
- * 
+ * @param {FormData} formData 
+ * @returns {Settings}
+ */
+ function formToSettings(formData) {
+    let settings = new Settings()
+    for (const [id, key] of Object.entries(InputToSet)) {
+        settings[key] = formData.get(id)
+    }
+
+    return settings
+}
+
+/**
+ * The callback function that is invoked when a Web Worker actor finished a run
+ * and reports back the raw length and [f64] data
+ * This saves the data and either draws or updates the results HTML elements
  * @param {RawSimData} rawData 
  */
 function saveRunData(rawData) {
@@ -151,21 +171,6 @@ function saveRunData(rawData) {
 }
 
 /**
- * 
- * @param {FormData} formData 
- * @returns {Settings}
- */
-function formToSettings(formData) {
-    let settings = new Settings()
-    for (const [id, key] of Object.entries(InputToSet)) {
-        settings[key] = formData.get(id)
-    }
-
-    return settings
-}
-
-/**
- * 
  * @param {RawSimData} rawData 
  * @returns {SimulationData}
  */
@@ -180,9 +185,6 @@ function rawToLabeled(rawData) {
         q91: raw[4],
     }
 }
-
-// ---------- callback and receiver routines ----------
-
 
 // ---------- helper routines ----------
 
@@ -385,8 +387,12 @@ function makeRadioButton(name, label, id, value, checked = false) {
     return c
 }
 
+/**
+ * Event listener for a change in the Unit form
+ * @param {Event} evt 
+ */
 function updateTimeUnit(evt) {
-    const unit = evt.srcElement.value
+    const unit = evt.target.value
     const info = TimeUnits[unit]
 
     if (info === undefined) {
@@ -398,6 +404,10 @@ function updateTimeUnit(evt) {
     }
 }
 
+/**
+ * 
+ * @param {SimulationData[]} data 
+ */
 function updateResultsInfo(data) {
     updatePlot(data, document.getElementById(ELEMENTS.plot))
     const tbl = createTable(data)

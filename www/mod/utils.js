@@ -67,5 +67,4 @@ class StatusTimer {
     }
 }
 
-
 export { Settings, StatusTimer };
