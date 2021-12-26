@@ -7,20 +7,25 @@ The code is based on the famous [Optimal Chain Length is 17](https://www.reddit.
 
 In short, it simulates how long it will take to find a shiny while using the pokeradar for a chain of a given length. 
 
-
 ## Parameters
 
 * **Starting Chain** - the smallest chain to simulate
 * **Max Chain** - the largest chain to simulate 
   * All chains between **Starting** and **Max** are simulated
 * **Sampling Runs** - the number of times to simulate a shiny hunt at a chain length
+  * The higher the number, the more accurate the timing information; however, the simulation will take longer to run
 * **Total Shinies** - the total number of shinies to find before the hunt simulation is complete
 * **Pokemon Encounter Rate** - the encounter rate (to the tenth of a percent) of the target pokemon
 * **Time to Catch** - how long (in seconds) it takes on average to capture the target pokemon
-  * A turn 1 quick ball capture is around **~35 seconds**, depending on route, affection, ability, etc.
-  * A false swipe then capture is around **~45 seconds**
+  * A turn 1 quick ball capture is **~35 seconds**, depending on route, affection, ability, etc.
+  * A false swipe then capture is **~45 seconds**
 * **Time to Run** - how long (in seconds) it takes on average from the wrong pokemon while starting a chain
 * **Time to Re-roll Pokeradar** - how long (in seconds) it takes on average to walk 50 steps, re-roll the radar, and enter a grass patch
+
+## Outputs
+The simulation will return [five quantiles](https://en.wikipedia.org/wiki/Quantile) for each chain length: Q9, Q25, Q50, Q75, and Q90. These are used to graph a box plot to show you how much time you'll lose hunting that shiny.
+
+The most interesting value is probably [the median (Q50)](https://en.wikipedia.org/wiki/Median). This will give you a rough overview of which chain length is the quickest. However, this data has a [very long tail](https://en.wikipedia.org/wiki/Long_tail), which is a fancy way of saying a shiny hunt can take a very long time. With that in mind, you can also look at the Q75 and/or Q91 values to see help you pick a good chain that isn't too variable if luck isn't on your side.
 
 ## Assumptions
 * The player always has and does the optimal radar move:
@@ -45,5 +50,5 @@ The main "mathy" code is in Rust and is compiled to WASM for running the browser
 
 ### CLI
 1. [Install Cargo/Rust](https://rustup.rs)
-2. `cargo run --release --bin shunter -- {options}` or `cargo install --bin shunter`
-
+2. Use Cargo to install the CLI app: `cargo install --bin shunter`
+3. Run the CLI app: `shunter {options}`
