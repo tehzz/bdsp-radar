@@ -40,6 +40,10 @@ The most interesting value is probably [the median (Q50)](https://en.wikipedia.o
 ### Figure out how grass patches are distributed
 Right now, the code assumes that there will (a) be four patches and (b) at least one patch will four tiles away. Ideally, this distribution would be simulated as well for both continuing the chain, and capturing a shiny in a non-optimal patch
 
+### Download data as CSV and/or JSON
+
+### Run Termination
+
 ## Building
 The main "mathy" code is in Rust and is compiled to WASM for running the browser. There is also a stand-alone CLI app for running the simulations directly on your computer
 
