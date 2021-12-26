@@ -1,7 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
-export function run_shiny_mc(a: number, b: number): void;
 export function run_shiny_mc_single_chain(a: number, b: number, c: number): void;
 export function __wbg_config_free(a: number): void;
 export function __wbg_get_config_chain_start(a: number): number;

@@ -3,11 +3,6 @@ declare namespace wasm_bindgen {
 	/* eslint-disable */
 	/**
 	* @param {Config} config
-	* @returns {Float64Array}
-	*/
-	export function run_shiny_mc(config: Config): Float64Array;
-	/**
-	* @param {Config} config
 	* @param {number} target
 	* @returns {Float64Array}
 	*/
@@ -51,7 +46,6 @@ declare type InitInput = RequestInfo | URL | Response | BufferSource | WebAssemb
 
 declare interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly run_shiny_mc: (a: number, b: number) => void;
   readonly run_shiny_mc_single_chain: (a: number, b: number, c: number) => void;
   readonly __wbg_config_free: (a: number) => void;
   readonly __wbg_get_config_chain_start: (a: number) => number;
