@@ -1,0 +1,120 @@
+html {
+    box-sizing: border-box;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+body {
+    background-color: #ddd;
+    font-family: Helvetica, Arial, Sans-Serif;
+}
+
+h1 {
+    text-shadow: #777 1px 1px 2px;
+    text-align: center;
+}
+
+#mcParameters > fieldset {
+    margin: auto;
+    width: 85%;
+    min-width: 20rem;
+    display: grid;
+    gap: 0.25rem;
+    grid-template-columns: 1fr 1fr 3fr;
+    align-items: center;
+    border: none;
+}
+
+fieldset > label {
+    border-bottom: 1px dotted #111;
+}
+
+fieldset > p {
+    margin: 0.16rem;
+    font-size: 0.9em;
+}
+
+fieldset > button {
+    grid-column: 1 / span 3;
+}
+
+label {
+    cursor: pointer;
+}
+
+#boxPlot {
+    margin: auto;
+    padding-bottom: 2rem;
+}
+
+#results {
+    margin-top: 2rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed #000;
+}
+
+#radarDataTable {
+    margin-top: 1rem;
+    margin: auto;
+}
+
+#results > p {
+    background-color: #777;
+    color: #efefef;
+    text-align: center;
+    text-shadow: #444 1px 1px 2px;
+    width: 75%;
+    margin: auto;
+    margin-top: 1rem;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    padding: 0.2rem;
+}
+
+#unitSelector {
+    width: 100%;
+    margin: auto;
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+
+    margin-bottom: 0.4rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px dashed #000;
+}
+
+#statusTimer {
+    line-height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    border-bottom: 1px dashed #000;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+/* https://stephanwagner.me/only-css-loading-spinner */
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
+ 
+.spinner:before {
+  content: '';
+  box-sizing: border-box;
+  position: relative;
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  margin-top: 0rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  border-top-color: #07d;
+  animation: spinner .6s linear infinite;
+}
