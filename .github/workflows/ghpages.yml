@@ -16,10 +16,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Get wasm-pack
       uses: jetli/wasm-pack-action@v0.3.0
-    - name: Build wasm
-      run: ./build.sh
-    - name: Ignore pkg gitignore
-      run: rm -fv ./www/pkg/.gitignore
+    - name: Build site
+      run: ./build-gh-pages.sh
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@4.1.7
       with:
