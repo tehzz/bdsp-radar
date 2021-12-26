@@ -56,8 +56,8 @@ label {
 }
 
 #radarDataTable {
-    margin-top: 1rem;
     margin: auto;
+    margin-top: 1rem;
 }
 
 #results > p {
@@ -96,6 +96,24 @@ label {
     border-bottom: 1px dashed #000;
     margin-bottom: 0.5rem;
     padding-bottom: 0.5rem;
+}
+
+/* Basic responsive design */
+@media (max-width: 600px) {
+    #mcParameters > fieldset {
+        width: 100%;
+        grid-template-columns: 1fr 1fr;
+    }
+    fieldset > p {
+        grid-column: 1 / span 2;
+        color: #444;
+    }
+    fieldset > button {
+        grid-column: 1 / span 2;
+    }
+    #radarDataTable {
+        font-size: 0.75rem;
+    }
 }
 
 /* https://stephanwagner.me/only-css-loading-spinner */
