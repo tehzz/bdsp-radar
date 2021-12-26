@@ -1,0 +1,25 @@
+name: Build and Deploy GH Pages
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-gh-pages:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get wasm-pack
+      uses: jetli/wasm-pack-action@v0.3.0
+    - name: Build wasm
+      run: ./build.sh
+    - name: Deploy
+      uses: JamesIves/github-pages-deploy-action@4.1.7
+      with:
+          branch: gh-pages
+          folder: www
