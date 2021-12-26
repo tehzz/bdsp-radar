@@ -24,6 +24,7 @@ import { WorkerPool } from './mod/pool.js'
 /** HTML element IDs */
 const ELEMENTS = {
     params: "mcParameters",
+    paramFields: "mcParaFields",
     loader: "spinner",
     plot: "boxPlot",
     results: "results",
@@ -110,6 +111,8 @@ function runSimulation(pool, evt) {
     const formdata = new FormData(evt.target)
     const settings = formToSettings(formdata)
 
+    disableParameterEntry()
+
     TIMER.start(settings.chain_max - settings.chain_start + 1)
 
     const resdiv = document.getElementById(ELEMENTS.results)
@@ -168,6 +171,10 @@ function saveRunData(rawData) {
     }
     
     document.getElementById(ELEMENTS.timer).replaceWith(TIMER.render())
+
+    if (TIMER.isFinished()) {
+        enableParameterEntry()
+    }
 }
 
 /**
@@ -413,4 +420,14 @@ function updateResultsInfo(data) {
     const tbl = createTable(data)
     document.getElementById(ELEMENTS.resTable).replaceWith(tbl)
     Sortable.initTable(tbl)
+}
+
+/** Disable the parameters field while a simulation is runnning */
+function disableParameterEntry() {
+    document.getElementById(ELEMENTS.paramFields).disabled = true
+}
+
+/** Enable the parameters field after a simulation has finished */
+function enableParameterEntry() {
+    document.getElementById(ELEMENTS.paramFields).disabled = false
 }

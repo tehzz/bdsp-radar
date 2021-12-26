@@ -50,6 +50,9 @@ class StatusTimer {
         this.stopTime = performance.now()
         this.finished = true
     }
+    isFinished() {
+        return this.finished
+    }
     render() {
         const el = document.createElement('div')
         el.id = this.id
