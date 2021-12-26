@@ -18,6 +18,8 @@ jobs:
       uses: jetli/wasm-pack-action@v0.3.0
     - name: Build wasm
       run: ./build.sh
+    - name: Ignore pkg gitignore
+      run: rm -rf ./www/pgk/.gitignore
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@4.1.7
       with:
