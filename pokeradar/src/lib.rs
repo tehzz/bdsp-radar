@@ -77,14 +77,6 @@ pub fn find_shiny(config: Config) -> Result<Vec<Percentiles>, RadarError> {
     Ok(mc_summary)
 }
 
-#[cfg(target_arch = "wasm32")]
-pub fn find_shiny(config: Config) -> impl Iterator<Item = Percentiles> {
-    let chain_range = config.chain_start as usize..=config.chain_max as usize;
-    let find_shiny = move |len| mc_find_radar_shiny(config, len);
-
-    chain_range.into_iter().map(find_shiny)
-}
-
 fn encountered_correct_pkmn(rng: &mut ThreadRng, rate: u32) -> bool {
     rng.gen_ratio(rate, 1000)
 }
